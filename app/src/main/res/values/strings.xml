@@ -1,4 +1,7 @@
 <resources>
-    <string name="app_name">LAB_WEEK_05</string>
-    <string name="image_placeholder">Image URL: %s</string>
+    <string name="app_name">Lab Week 05</string>
+    <string name="image_placeholder">Image URL: %1$s</string>
+    <string name="error_message">Error: %1$s</string>
+    <string name="error_fetching_data">Failed to fetch data</string>
+    <string name="no_image_found">No image found</string>
 </resources>

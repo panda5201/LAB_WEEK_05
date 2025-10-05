@@ -3,7 +3,6 @@ package com.example.lab_week_05
 import android.os.Bundle
 import android.util.Log
 import android.widget.ImageView
-import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
 import com.example.lab_week_05.api.CatApiService
@@ -22,28 +21,20 @@ class MainActivity : AppCompatActivity() {
         .add(KotlinJsonAdapterFactory())
         .build()
 
-    private val retrofit by lazy {
-        Retrofit.Builder()
-            .baseUrl("https://api.thecatapi.com/v1/")
-            .addConverterFactory(MoshiConverterFactory.create(moshi))
-            .build()
-    }
+    private val retrofit = Retrofit.Builder()
+        .baseUrl("https://api.thecatapi.com/v1/")
+        .addConverterFactory(MoshiConverterFactory.create(moshi))
+        .build()
 
-    private val catApiService by lazy {
-        retrofit.create(CatApiService::class.java)
-    }
+    private val catApiService = retrofit.create(CatApiService::class.java)
 
-    private val apiResponseView: TextView by lazy {
-        findViewById(R.id.api_response)
-    }
-
-    private val catImageView: ImageView by lazy {
-        findViewById(R.id.cat_image)
-    }
+    private lateinit var imageView: ImageView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        imageView = findViewById(R.id.cat_image)
         getCatImageResponse()
     }
 
@@ -59,25 +50,15 @@ class MainActivity : AppCompatActivity() {
                 response: Response<List<ImageData>>
             ) {
                 if (response.isSuccessful) {
-                    val imageList = response.body()
-                    val firstImageUrl = imageList?.firstOrNull()?.imageUrl
-                    Log.d(MAIN_ACTIVITY, "Cat API URL: $firstImageUrl")
-
-                    if (!firstImageUrl.isNullOrEmpty()) {
-                        apiResponseView.text = firstImageUrl
+                    val imageUrl = response.body()?.firstOrNull()?.imageUrl
+                    Log.d(MAIN_ACTIVITY, "Cat API URL: $imageUrl")
+                    if (imageUrl != null) {
                         Glide.with(this@MainActivity)
-                            .load(firstImageUrl)
-                            .placeholder(android.R.drawable.ic_menu_gallery)
-                            .error(android.R.drawable.stat_notify_error)
-                            .into(catImageView)
-                    } else {
-                        apiResponseView.text = "No image URL found."
+                            .load(imageUrl)
+                            .into(imageView)
                     }
                 } else {
-                    Log.e(
-                        MAIN_ACTIVITY,
-                        "Failed response: ${response.errorBody()?.string()}"
-                    )
+                    Log.e(MAIN_ACTIVITY, "Error: ${response.errorBody()?.string()}")
                 }
             }
         })
