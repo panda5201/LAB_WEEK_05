@@ -13,12 +13,14 @@ import retrofit2.converter.scalars.ScalarsConverterFactory
 
 class MainActivity : AppCompatActivity() {
 
+    private val retrofit: Retrofit by lazy {
         Retrofit.Builder()
             .baseUrl("https://api.thecatapi.com/v1/")
             .addConverterFactory(ScalarsConverterFactory.create())
             .build()
     }
 
+    private val catApiService: CatApiService by lazy {
         retrofit.create(CatApiService::class.java)
     }
 
@@ -38,8 +40,14 @@ class MainActivity : AppCompatActivity() {
             override fun onFailure(call: Call<String>, t: Throwable) {
                 Log.e(MAIN_ACTIVITY, "Failed to get response", t)
             }
+
+            override fun onResponse(call: Call<String>, response: Response<String>) {
                 if (response.isSuccessful) {
                     apiResponseView.text = response.body()
+                } else {
+                    Log.e(
+                        MAIN_ACTIVITY,
+                        "Failed to get response\n" + response.errorBody()?.string().orEmpty()
                     )
                 }
             }
