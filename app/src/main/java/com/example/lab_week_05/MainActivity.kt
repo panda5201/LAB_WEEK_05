@@ -2,8 +2,10 @@ package com.example.lab_week_05
 
 import android.os.Bundle
 import android.util.Log
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import com.bumptech.glide.Glide
 import com.example.lab_week_05.api.CatApiService
 import com.example.lab_week_05.model.ImageData
 import com.squareup.moshi.Moshi
@@ -35,10 +37,13 @@ class MainActivity : AppCompatActivity() {
         findViewById(R.id.api_response)
     }
 
+    private val catImageView: ImageView by lazy {
+        findViewById(R.id.cat_image)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
         getCatImageResponse()
     }
 
@@ -55,13 +60,23 @@ class MainActivity : AppCompatActivity() {
             ) {
                 if (response.isSuccessful) {
                     val imageList = response.body()
-                    val firstImageUrl = imageList?.firstOrNull()?.imageUrl ?: "No URL"
-                    apiResponseView.text =
-                        getString(R.string.image_placeholder, firstImageUrl)
+                    val firstImageUrl = imageList?.firstOrNull()?.imageUrl
+                    Log.d(MAIN_ACTIVITY, "Cat API URL: $firstImageUrl")
+
+                    if (!firstImageUrl.isNullOrEmpty()) {
+                        apiResponseView.text = firstImageUrl
+                        Glide.with(this@MainActivity)
+                            .load(firstImageUrl)
+                            .placeholder(android.R.drawable.ic_menu_gallery)
+                            .error(android.R.drawable.stat_notify_error)
+                            .into(catImageView)
+                    } else {
+                        apiResponseView.text = "No image URL found."
+                    }
                 } else {
                     Log.e(
                         MAIN_ACTIVITY,
-                        "Failed to get response\n${response.errorBody()?.string().orEmpty()}"
+                        "Failed response: ${response.errorBody()?.string()}"
                     )
                 }
             }
